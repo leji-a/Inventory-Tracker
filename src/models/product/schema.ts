@@ -7,6 +7,7 @@ export const ProductSchema = t.Object({
   category: t.String(),
   quantity: t.Number(),
   price: t.Number(),
+  categoryIds: t.Optional(t.Array(t.Number())),
 })
 
 // Optional: export a TypeScript type for strong typing

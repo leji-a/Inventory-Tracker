@@ -1,17 +1,21 @@
 import { Elysia } from 'elysia'
 import { ProductSchema } from './schema'
-import { getAllProducts, 
-    getProductById, 
-    createProduct, 
-    updateProduct, 
-    deleteProduct } 
-from '../product/service'
+import * as service from './service'
+import { SupabasePlugin } from '../../plugins/supabase'
+
 
 export const ProductRoutes = new Elysia({ prefix: '/products' })
-    .get('/', () => getAllProducts())
-    .get('/:id', ({ params: { id } }) => getProductById(Number(id)))
-    .post('/', ({ body }) => createProduct(body), { body: ProductSchema })
-    .put('/:id', ({ params: { id }, body }) => updateProduct(Number(id), body), {
-      body: ProductSchema,
-    })
-    .delete('/:id', ({ params: { id } }) => deleteProduct(Number(id)))
+  .use(SupabasePlugin)
+  .get('/', async ({ supabase }) => service.getAllProducts(supabase))
+  .get('/:id', async ({ supabase, params: { id } }) =>
+    service.getProductById(supabase, Number(id))
+  )
+  .post('/', async ({ supabase, body }) => service.createProduct(supabase, body), {
+    body: ProductSchema,
+  })
+  .put('/:id', async ({ supabase, params: { id }, body }) =>
+    service.updateProduct(supabase, Number(id), body), { body: ProductSchema }
+  )
+  .delete('/:id', async ({ supabase, params: { id } }) =>
+    service.deleteProduct(supabase, Number(id))
+  )
