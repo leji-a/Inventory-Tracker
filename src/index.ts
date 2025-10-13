@@ -1,3 +1,4 @@
+// index.ts
 import { Elysia } from "elysia";
 import 'dotenv/config'
 import { SupabasePlugin } from "./plugins/supabase"

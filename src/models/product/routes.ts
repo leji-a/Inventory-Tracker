@@ -1,3 +1,4 @@
+// models/product/routes.ts
 import { Elysia } from 'elysia'
 import { ProductSchema } from './schema'
 import * as service from './service'

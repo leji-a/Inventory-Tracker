@@ -1,3 +1,4 @@
+// models/product/service.ts
 import type { Product } from './schema'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { ProductWithCategories } from '../../types/types'

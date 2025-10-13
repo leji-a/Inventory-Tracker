@@ -1,3 +1,4 @@
+// models/category/schema.ts
 import { t } from 'elysia'
 
 export const CategorySchema = t.Object({

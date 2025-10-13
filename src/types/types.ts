@@ -1,3 +1,4 @@
+// types/types.ts
 export type ProductWithCategories = {
   id: number
   name: string

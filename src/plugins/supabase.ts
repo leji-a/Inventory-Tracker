@@ -1,3 +1,4 @@
+// plugins/supabase.ts
 import { Elysia } from 'elysia'
 import { createSupabaseClient } from '../lib/supabase'
 
