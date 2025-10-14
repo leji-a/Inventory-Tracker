@@ -1,15 +1,25 @@
 // index.ts
-import { Elysia } from "elysia";
 import 'dotenv/config'
+import { Elysia } from "elysia";
+import { cors } from '@elysiajs/cors'
 import { SupabasePlugin } from "./plugins/supabase"
 import { ProductRoutes } from "./models/product/routes"
 import { CategoryRoutes } from "./models/category/routes"
+import { ErrorHandler } from "./plugins/errorsHandler";
+import { rateLimit } from 'elysia-rate-limit'
 
+const PORT = process.env.PORT || 3000
 const app = new Elysia()
+    .use(rateLimit({
+        duration: 60000, // 1 minute
+        max: 100, // 100 requests per minute
+      }))
+    .get('/health', () => ({ status: 'ok', timestamp: new Date().toISOString() }))
+    .use(cors())
+    .use(ErrorHandler)
     .use(SupabasePlugin)
-
     .use(ProductRoutes)
     .use(CategoryRoutes)
-    .listen(3000)
-
-console.log(`🛒 Inventory API running at http://${app.server?.hostname}:${app.server?.port}`)
+    .listen(PORT, () => {
+        console.log(`Inventory API running on port ${PORT}`)
+    })
