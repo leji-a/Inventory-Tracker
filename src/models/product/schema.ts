@@ -19,6 +19,20 @@ export const ProductOutputSchema = t.Object({
   created_at: t.Optional(t.String()),
 });
 
+export const PaginationSchema = t.Object({
+  page: t.Number(),
+  limit: t.Number(),
+  total: t.Number(),
+  totalPages: t.Number(),
+  hasNextPage: t.Boolean(),
+  hasPrevPage: t.Boolean(),
+})
+
+export const PaginatedProductsSchema = t.Object({
+  data: t.Array(ProductOutputSchema),
+  pagination: PaginationSchema,
+})
+
 export const ErrorSchema = t.Object({
   error: t.String()
 })

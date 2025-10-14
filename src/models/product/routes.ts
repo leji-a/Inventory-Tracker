@@ -1,6 +1,6 @@
 // models/product/routes.ts
 import { Elysia, t } from 'elysia'
-import { ProductInputSchema, ProductOutputSchema, ErrorSchema } from './schema'
+import { ProductInputSchema, ProductOutputSchema, ErrorSchema, PaginatedProductsSchema, PaginationSchema } from './schema'
 import * as service from './service'
 import { SupabasePlugin } from '../../plugins/supabase'
 import { ValidationError } from '../../lib/errors'
@@ -8,11 +8,24 @@ import { ValidationError } from '../../lib/errors'
 export const ProductRoutes = new Elysia({ prefix: '/products' })
   .use(SupabasePlugin)
 
-  .get('/', async ({ supabase }) => {
-    return await service.getAllProducts(supabase)
+  .get('/', async ({ supabase, query }) => {
+    // Parse pagination params from query string
+    const page = query.page ? parseInt(query.page) : 1
+    const limit = query.limit ? parseInt(query.limit) : 20
+
+    // Validate
+    if (isNaN(page) || page < 1) {
+      throw new ValidationError('Page must be a positive number')
+    }
+    if (isNaN(limit) || limit < 1 || limit > 100) {
+      throw new ValidationError('Limit must be between 1 and 100')
+    }
+
+    return await service.getAllProducts(supabase, { page, limit })
   }, {
     response: {
-      200: t.Array(ProductOutputSchema),
+      200: PaginatedProductsSchema, 
+      400: ErrorSchema,
       500: ErrorSchema
     }
   })
@@ -50,7 +63,7 @@ export const ProductRoutes = new Elysia({ prefix: '/products' })
     }
     return await service.updateProduct(supabase, productId, body)
   }, {
-    body: t.Partial(ProductInputSchema), // ✅ All fields optional for update
+    body: t.Partial(ProductInputSchema), // All fields optional for update
     response: {
       200: ProductOutputSchema,
       400: ErrorSchema,
@@ -58,6 +71,7 @@ export const ProductRoutes = new Elysia({ prefix: '/products' })
       500: ErrorSchema
     }
   })
+
   .delete('/:id', async ({ supabase, params: { id } }) => {
     const productId = Number(id)
     if (isNaN(productId) || productId <= 0) {

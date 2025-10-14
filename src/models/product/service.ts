@@ -1,7 +1,7 @@
 // models/product/service.ts
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { ProductInput, ProductOutput } from './schema'
-import type { ProductWithCategories } from '../../types/types'
+import type { ProductWithCategories, PaginatedResponse, PaginationParams } from '../../types/types'
 import { UnauthorizedError, NotFoundError, ValidationError } from '../../lib/errors'
 
 function mapProduct(p: ProductWithCategories): ProductOutput {
@@ -15,7 +15,29 @@ function mapProduct(p: ProductWithCategories): ProductOutput {
   }
 }
 
-export async function getAllProducts(supabase: SupabaseClient): Promise<ProductOutput[]> {
+export async function getAllProducts(
+  supabase: SupabaseClient,
+  { page = 1, limit = 20 }: PaginationParams = {}
+): Promise<PaginatedResponse<ProductOutput>> {
+  // Validate pagination params
+  if (page < 1) page = 1
+  if (limit < 1) limit = 20
+  if (limit > 100) limit = 100 // Max 100 items per page
+
+  const from = (page - 1) * limit
+  const to = from + limit - 1
+
+  // Get total count
+  const { count, error: countError } = await supabase
+    .from('products')
+    .select('*', { count: 'exact', head: true })
+
+  if (countError) throw countError
+
+  const total = count ?? 0
+  const totalPages = Math.ceil(total / limit)
+
+  // Get paginated data
   const { data, error } = await supabase
     .from('products')
     .select(`
@@ -28,9 +50,21 @@ export async function getAllProducts(supabase: SupabaseClient): Promise<ProductO
       )
     `)
     .order('id')
+    .range(from, to)
 
   if (error) throw error
-  return (data as ProductWithCategories[]).map(mapProduct)
+
+  return {
+    data: (data as ProductWithCategories[]).map(mapProduct),
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+    }
+  }
 }
 
 export async function getProductById(supabase: SupabaseClient, id: number): Promise<ProductOutput> {
