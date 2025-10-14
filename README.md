@@ -3,12 +3,15 @@
 A simple Inventory Management API built with [Elysia](https://elysiajs.com/) and [Supabase](https://supabase.com/).
 
 It allows authenticated users to manage Products and Categories, with ownership-based access enforced by Supabase Row Level Security (RLS).
+
 ## Features
+
 - RESTful API powered by Elysia.js
 - Database & Auth handled by Supabase
 - Secure per-user data isolation via RLS
 
 ## Project strucure
+
 ```graphql
 .
 ├── index.ts                    # App entrypoint
@@ -71,6 +74,7 @@ It allows authenticated users to manage Products and Categories, with ownership-
   "categoryIds": [1, 2]
 }
 ```
+
 #### Example response
 
 ```json
@@ -87,8 +91,10 @@ It allows authenticated users to manage Products and Categories, with ownership-
 ```
 
 TODO
-- [ ] Add pagination & sorting to /products
-- [ ] Improve input validation & error handling
+
+- [x] Add pagination & sorting to /products
+- [x] Improve input validation & error handling
 - [ ] Implement caching for read endpoints
 - [ ] Add unit tests with Bun’s test runner
 - [ ] Include owner_id directly in product/category queries for debugging
+
