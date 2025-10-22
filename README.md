@@ -43,13 +43,13 @@ It allows authenticated users to manage Products, Categories, and Product Images
 
 ### Categories
 
-| Method | Endpoint            | Description                   |
-| ------ | ------------------- | ----------------------------- |
-| GET    | `/categories`       | Get all categories (paginated)|
-| GET    | `/categories/:id`   | Get a category by ID          |
-| POST   | `/categories`       | Create a new category         |
-| PUT    | `/categories/:id`   | Update a category             |
-| DELETE | `/categories/:id`   | Delete a category             |
+| Method | Endpoint          | Description                    |
+| ------ | ----------------- | ------------------------------ |
+| GET    | `/categories`     | Get all categories (paginated) |
+| GET    | `/categories/:id` | Get a category by ID           |
+| POST   | `/categories`     | Create a new category          |
+| PUT    | `/categories/:id` | Update a category              |
+| DELETE | `/categories/:id` | Delete a category              |
 
 #### Example (POST `/categories`)
 
@@ -70,13 +70,13 @@ GET /categories?page=1&limit=20
 
 ### Products
 
-| Method | Endpoint                      | Description                          |
-| ------ | ----------------------------- | ------------------------------------ |
-| GET    | `/products`                   | Get all products (paginated)         |
-| GET    | `/products/:id`               | Get a product by ID                  |
-| POST   | `/products`                   | Create a new product                 |
-| PUT    | `/products/:id`               | Update an existing product           |
-| DELETE | `/products/:id`               | Delete a product                     |
+| Method | Endpoint        | Description                  |
+| ------ | --------------- | ---------------------------- |
+| GET    | `/products`     | Get all products (paginated) |
+| GET    | `/products/:id` | Get a product by ID          |
+| POST   | `/products`     | Create a new product         |
+| PUT    | `/products/:id` | Update an existing product   |
+| DELETE | `/products/:id` | Delete a product             |
 
 #### Example (POST `/products`)
 
@@ -131,12 +131,12 @@ GET /products?page=1&limit=20
 
 ### Product Images
 
-| Method | Endpoint                             | Description                              |
-| ------ | ------------------------------------ | ---------------------------------------- |
-| POST   | `/products/:id/images`               | Upload image file to Supabase Storage    |
-| POST   | `/products/:id/images/url`           | Add image via external URL               |
-| PUT    | `/products/:id/images/reorder`       | Reorder product images                   |
-| DELETE | `/products/:id/images/:imageId`      | Delete a specific image                  |
+| Method | Endpoint                        | Description                           |
+| ------ | ------------------------------- | ------------------------------------- |
+| POST   | `/products/:id/images`          | Upload image file to Supabase Storage |
+| POST   | `/products/:id/images/url`      | Add image via external URL            |
+| PUT    | `/products/:id/images/reorder`  | Reorder product images                |
+| DELETE | `/products/:id/images/:imageId` | Delete a specific image               |
 
 #### Example (POST `/products/:id/images/url` - Add via URL)
 
@@ -175,7 +175,8 @@ file: keyboard.jpg
 
 This API supports **two ways** to add product images:
 
-### 1. External Image URLs 
+### 1. External Image URLs
+
 Paste image links from services like Imgur, Cloudinary, or your own CDN:
 
 ```bash
@@ -190,7 +191,8 @@ Content-Type: application/json
 ✅ **Pros:** Fast, no storage management, simple  
 ❌ **Cons:** Depends on external service
 
-### 2. File Uploads 
+### 2. File Uploads
+
 Upload images directly to Supabase Storage:
 
 ```bash
@@ -229,7 +231,8 @@ Users can only access their own data (enforced by RLS).
 - [x] Improve input validation & error handling
 - [x] Add multiple image support per product
 - [x] Implement hybrid image system (URLs + uploads)
-- [ ] Deploy and test in production
+- [x] Deploy and test in production
+- [ ] Create a frontend
 - [ ] Add search/filtering endpoints
 - [ ] Add unit tests with Bun's test runner
 - [ ] Implement rate limiting
@@ -250,3 +253,4 @@ Users can only access their own data (enforced by RLS).
 ## Contributing
 
 Pull requests are welcome! For major changes, please open an issue first.
+
