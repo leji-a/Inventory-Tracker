@@ -5,7 +5,8 @@ import { cors } from '@elysiajs/cors'
 import { SupabasePlugin } from "./plugins/supabase"
 import { ProductRoutes } from "./models/product/routes"
 import { CategoryRoutes } from "./models/category/routes"
-import { ErrorHandler } from "./plugins/errorsHandler";
+import { ProductCSVRoutes } from './models/product/csv_routes';
+import { ErrorHandler } from "./plugins/errorsHandler"
 import { rateLimit } from 'elysia-rate-limit'
 
 const PORT = process.env.PORT || 3000
@@ -18,6 +19,8 @@ const app = new Elysia()
     .use(cors())
     .use(ErrorHandler)
     .use(SupabasePlugin)
+    // routes
+    .use(ProductCSVRoutes)
     .use(ProductRoutes)
     .use(CategoryRoutes)
     .listen(PORT, () => {
