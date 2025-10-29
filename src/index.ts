@@ -9,6 +9,7 @@ import { ProductCSVRoutes } from './models/product/csv_routes';
 import { InventoryRoutes } from './models/inventory/routes';
 import { ErrorHandler } from "./plugins/errorsHandler"
 import { rateLimit } from 'elysia-rate-limit'
+import { InventoryCSVRoutes } from './models/inventory/csv-routes';
 
 const PORT = process.env.PORT || 3000
 const app = new Elysia()
@@ -25,6 +26,7 @@ const app = new Elysia()
     .use(ProductRoutes)
     .use(CategoryRoutes)
     .use(InventoryRoutes)
+    .use(InventoryCSVRoutes)
     .listen(PORT, () => {
         console.log(`Inventory API running on port ${PORT}`)
     })
