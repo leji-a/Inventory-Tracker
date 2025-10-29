@@ -24,7 +24,7 @@ function mapProduct(p: ProductWithCategories): ProductOutput {
       id: img.id,
       image_url: img.image_url,
       display_order: img.display_order
-    })).sort((a, b) => a.display_order - b.display_order) ?? [], 
+    })).sort((a, b) => a.display_order - b.display_order) ?? [],
   }
 }
 
@@ -84,7 +84,7 @@ export async function getAllProducts(
 
 
 export async function getProductById(
-  supabase: SupabaseClient, 
+  supabase: SupabaseClient,
   id: number
 ): Promise<ProductOutput> {
   const { data, error } = await supabase
@@ -142,6 +142,7 @@ export async function createProduct(
     .from("products")
     .insert({
       ...productData,
+      quantity: productData.quantity ?? 0,
       owner_id: user.id,
     })
     .select()

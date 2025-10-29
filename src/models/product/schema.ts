@@ -10,7 +10,7 @@ export const ProductImageSchema = t.Object({
 // For incoming requests (create/update)
 export const ProductInputSchema = t.Object({
   name: t.String({ minimum: 1 }),
-  quantity: t.Number({ minimum: 0 }),
+  quantity: t.Optional(t.Number({ minimum: 0 })),
   price: t.Number({ minimum: 0.01 }),
   categoryIds: t.Optional(t.Array(t.Number())),
 })
