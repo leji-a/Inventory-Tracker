@@ -6,6 +6,7 @@ import { SupabasePlugin } from "./plugins/supabase"
 import { ProductRoutes } from "./models/product/routes"
 import { CategoryRoutes } from "./models/category/routes"
 import { ProductCSVRoutes } from './models/product/csv_routes';
+import { InventoryRoutes } from './models/inventory/routes';
 import { ErrorHandler } from "./plugins/errorsHandler"
 import { rateLimit } from 'elysia-rate-limit'
 
@@ -23,6 +24,7 @@ const app = new Elysia()
     .use(ProductCSVRoutes)
     .use(ProductRoutes)
     .use(CategoryRoutes)
+    .use(InventoryRoutes)
     .listen(PORT, () => {
         console.log(`Inventory API running on port ${PORT}`)
     })
