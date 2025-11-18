@@ -1,5 +1,5 @@
 // models/category/schema.ts
-import { t } from 'elysia'
+import { t } from "elysia"
 
 // For requests (create/update)
 export const CategoryInputSchema = t.Object({
@@ -12,6 +12,9 @@ export const CategoryOutputSchema = t.Object({
   id: t.Number(),
   name: t.String(),
   description: t.Optional(t.String()),
+  owner_id: t.String(), 
+  created_at: t.String(), 
+  updated_at: t.Optional(t.String()), 
 })
 
 export const PaginationSchema = t.Object({
@@ -29,7 +32,7 @@ export const PaginatedCategoriesSchema = t.Object({
 })
 
 export const ErrorSchema = t.Object({
-  error: t.String()
+  error: t.String(),
 })
 
 export type CategoryInput = typeof CategoryInputSchema.static
