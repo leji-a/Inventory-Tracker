@@ -10,7 +10,7 @@ export const ProductImageSchema = t.Object({
 // For incoming requests (create/update)
 export const ProductInputSchema = t.Object({
   name: t.String({ minimum: 1 }),
-  quantity: t.Optional(t.Number({ minimum: 0 })),
+  // quantity: t.Optional(t.Number({ minimum: 0 })),
   price: t.Number({ minimum: 0.01 }),
   categoryIds: t.Optional(t.Array(t.Number())),
 });
@@ -19,7 +19,7 @@ export const ProductInputSchema = t.Object({
 export const ProductOutputSchema = t.Object({
   id: t.Number(),
   name: t.String(),
-  quantity: t.Optional(t.Number()),
+  // quantity: t.Optional(t.Number()),
   price: t.Number(),
   categoryIds: t.Array(t.Number()),
   categoryNames: t.Array(t.String()),

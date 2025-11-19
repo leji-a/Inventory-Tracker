@@ -16,7 +16,7 @@ function mapProduct(p: ProductWithCategories): ProductOutput {
   return {
     id: p.id,
     name: p.name,
-    quantity: p.quantity,
+    // quantity: p.quantity,
     price: p.price,
     categoryIds: p.product_categories?.map((pc) => pc.category.id) ?? [],
     categoryNames: p.product_categories?.map((pc) => pc.category.name) ?? [],
@@ -142,7 +142,7 @@ export async function createProduct(
     .from("products")
     .insert({
       ...productData,
-      quantity: productData.quantity ?? 0,
+      // quantity: productData.quantity ?? 0,
       owner_id: user.id,
     })
     .select()
