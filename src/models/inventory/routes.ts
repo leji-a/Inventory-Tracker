@@ -82,6 +82,20 @@ export const InventoryRoutes = new Elysia({ prefix: '/inventory' })
     }
   })
 
+  .delete('/periods/:periodId/records/:productId', async ({ supabase, params: { periodId, productId }, set }) => {
+    await service.deleteRecord(supabase, Number(periodId), Number(productId))
+    set.status = 204
+    return
+  }, {
+    response: {
+      204: t.Null(),
+      400: ErrorSchema,
+      404: ErrorSchema,
+      401: ErrorSchema,
+      500: ErrorSchema
+    }
+  })
+
   // Get current inventory
   .get('/current', async ({ supabase }) => {
     return await service.getCurrentInventory(supabase)

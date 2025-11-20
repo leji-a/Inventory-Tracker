@@ -243,3 +243,37 @@ export async function getProductHistory(
     }))
   }
 }
+
+export async function deleteRecord(
+  supabase: SupabaseClient,
+  periodId: number,
+  productId: number
+) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new UnauthorizedError()
+
+  // Check if the record exists and belongs to the user via period owner
+  const { data: record } = await supabase
+    .from('inventory_records')
+    .select(`
+      *,
+      period:inventory_periods (
+        owner_id
+      )
+    `)
+    .eq('period_id', periodId)
+    .eq('product_id', productId)
+    .single()
+
+  if (!record) throw new NotFoundError('Record not found')
+  if (record.period.owner_id !== user.id) throw new UnauthorizedError()
+
+  // Delete record
+  const { error } = await supabase
+    .from('inventory_records')
+    .delete()
+    .eq('period_id', periodId)
+    .eq('product_id', productId)
+
+  if (error) throw error
+}
