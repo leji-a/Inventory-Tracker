@@ -1,7 +1,6 @@
 -- ============================================================================
 -- INVENTORY TRACKER - COMPLETE DATABASE SETUP WITH INVENTORY PERIODS
 -- This includes the initial schema, fixes, AND new inventory tracking tables
--- Run this entire script in Supabase SQL Editor
 -- ============================================================================
 
 -- ============================================================================
@@ -437,19 +436,69 @@ FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================================
--- PART 4: REMOVE QUANTITY FROM PRODUCTS (OPTIONAL - DO THIS LAST)
+-- PART 4: SUPABASE STORAGE BUCKET AND RLS POLICIES
+-- ============================================================================
+
+-- Create the storage bucket for product images
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('product-images', 'product-images', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- RLS Policies for Storage - Users can upload their own images
+DROP POLICY IF EXISTS "Users can upload their own product images" ON storage.objects;
+CREATE POLICY "Users can upload their own product images"
+ON storage.objects FOR INSERT
+TO authenticated
+WITH CHECK (
+  bucket_id = 'product-images' 
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+-- RLS Policies for Storage - Anyone can view public images
+DROP POLICY IF EXISTS "Anyone can view product images" ON storage.objects;
+CREATE POLICY "Anyone can view product images"
+ON storage.objects FOR SELECT
+TO authenticated
+USING (bucket_id = 'product-images');
+
+-- RLS Policies for Storage - Users can update their own images
+DROP POLICY IF EXISTS "Users can update their own product images" ON storage.objects;
+CREATE POLICY "Users can update their own product images"
+ON storage.objects FOR UPDATE
+TO authenticated
+USING (
+  bucket_id = 'product-images' 
+  AND (storage.foldername(name))[1] = auth.uid()::text
+)
+WITH CHECK (
+  bucket_id = 'product-images' 
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+-- RLS Policies for Storage - Users can delete their own images
+DROP POLICY IF EXISTS "Users can delete their own product images" ON storage.objects;
+CREATE POLICY "Users can delete their own product images"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+  bucket_id = 'product-images' 
+  AND (storage.foldername(name))[1] = auth.uid()::text
+);
+
+-- ============================================================================
+-- PART 5: REMOVE QUANTITY FROM PRODUCTS (OPTIONAL - DO THIS LAST)
 -- ============================================================================
 -- IMPORTANT: Only run this section AFTER you've migrated your data to inventory_records
 -- and updated your backend code to use the new inventory system
 
 -- Step 1: Uncomment these lines when ready to migrate
--- -- Drop the quantity constraint first
+-- DROP the quantity constraint first
 ALTER TABLE products DROP CONSTRAINT IF EXISTS chk_quantity_non_negative;
--- 
--- -- Remove the quantity column
+
+-- Remove the quantity column
 ALTER TABLE products DROP COLUMN IF EXISTS quantity;
--- 
--- -- Remove the quantity index
+
+-- Remove the quantity index
 DROP INDEX IF EXISTS idx_products_quantity;
 
 -- ============================================================================
@@ -482,12 +531,26 @@ WHERE schemaname = 'public'
 AND tablename IN ('products', 'categories', 'product_categories', 'product_images', 'inventory_periods', 'inventory_records')
 ORDER BY tablename, policyname;
 
+-- Check storage bucket exists
+SELECT id, name, public FROM storage.buckets WHERE id = 'product-images';
+
+-- Check storage policies
+SELECT 
+    policyname,
+    cmd
+FROM pg_policies
+WHERE schemaname = 'storage'
+AND tablename = 'objects'
+AND policyname LIKE '%product images%'
+ORDER BY policyname;
+
 -- ============================================================================
--- DONE! Your database now includes:
--- - All original tables (products, categories, product_categories, product_images)
 -- - New inventory tracking (inventory_periods, inventory_records)
+-- - Supabase Storage bucket 'product-images' with RLS policies
 -- - 20+ indexes for performance
--- - 20+ RLS policies for security
+-- - 24+ RLS policies for security
 -- - Triggers for auto-updating timestamps
 -- 
+-- NOTE: The 'quantity' column has been removed from products table.
+-- All quantity tracking is now done via inventory_periods and inventory_records.
 -- ============================================================================
