@@ -299,6 +299,80 @@ export const InventoryCSVRoutes = new Elysia({ prefix: '/inventory' })
     }
   })
 
+  // ========== EXPORT SPECIFIC PERIOD ==========
+ .get('/export/period/:id', async ({ supabase, params }) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new UnauthorizedError()
+
+    const periodId = params.id
+
+    // Get selected period
+    const { data: period } = await supabase
+      .from('inventory_periods')
+      .select('*')
+      .eq('owner_id', user.id)
+      .eq('id', periodId)
+      .maybeSingle()
+
+    if (!period) {
+      throw new NotFoundError('Period not found or does not belong to the user.')
+    }
+
+    // Get inventory records with product details
+    const { data: records, error } = await supabase
+      .from('inventory_records')
+      .select(`
+        quantity,
+        notes,
+        product:products (
+          id,
+          name,
+          price,
+          product_categories (
+            category:categories (
+              name
+            )
+          )
+        )
+      `)
+      .eq('period_id', period.id)
+      .order('product_id')
+
+    if (error) throw error
+
+    // Convert to CSV format
+    const csvRows = [
+      `Period: ${period.name} (${period.start_date})`,
+      '',
+      'Product Name,Quantity,Price,Categories,Notes'
+    ]
+
+    for (const record of records || []) {
+      const product = record.product as any
+
+      const categories = product.product_categories
+        ?.map((pc: any) => pc.category.name)
+        .join(';') || ''
+
+      const escapedName = product.name.replace(/"/g, '""')
+      const escapedNotes = (record.notes || '').replace(/"/g, '""')
+
+      csvRows.push(
+        `"${escapedName}",${record.quantity},${product.price},"${categories}","${escapedNotes}"`
+      )
+    }
+
+    const csv = csvRows.join('\n')
+
+    return new Response(csv, {
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="inventory_${period.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv"`
+      }
+    })
+  })
+
+
   // ========== IMPORT INVENTORY COUNTS (UPDATE QUANTITIES IN ACTIVE PERIOD) ==========
   .post('/import/inventory', async ({ supabase, body }) => {
     const { data: { user } } = await supabase.auth.getUser()
