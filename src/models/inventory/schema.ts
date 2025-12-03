@@ -7,6 +7,11 @@ export const PeriodInputSchema = t.Object({
     notes: t.Optional(t.String()),
 })
 
+export const PeriodUpdateSchema = t.Object({
+    name: t.Optional(t.String({ minLength: 1 })),
+    notes: t.Optional(t.String()),
+})
+
 export const PeriodOutputSchema = t.Object({
     id: t.Number(),
     name: t.String(),

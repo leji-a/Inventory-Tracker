@@ -1,6 +1,6 @@
 // models/inventory/service.ts
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { NotFoundError, UnauthorizedError } from '../../lib/errors'
+import { NotFoundError, UnauthorizedError, ValidationError } from '../../lib/errors'
 
 export async function getAllPeriods(supabase: SupabaseClient) {
   const { data: { user } } = await supabase.auth.getUser()
@@ -47,8 +47,72 @@ export async function createPeriod(
 
   if (error) throw error
   return data
+}
 
+export async function updatePeriod(
+  supabase: SupabaseClient,
+  periodId: number,
+  updates: {
+    name?: string
+    notes?: string
+  }
+) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new UnauthorizedError()
 
+  // Validate that at least one field is provided
+  if (!updates.name && updates.notes === undefined) {
+    throw new ValidationError('At least one field must be provided for update')
+  }
+
+  // Build update object with only provided fields
+  const updateData: any = {}
+  if (updates.name !== undefined) updateData.name = updates.name
+  if (updates.notes !== undefined) updateData.notes = updates.notes
+
+  const { data, error } = await supabase
+    .from('inventory_periods')
+    .update(updateData)
+    .eq('id', periodId)
+    .eq('owner_id', user.id)
+    .select()
+    .single()
+
+  if (error) throw error
+  if (!data) throw new NotFoundError('Period not found')
+
+  return data
+}
+
+export async function deletePeriod(
+  supabase: SupabaseClient,
+  periodId: number
+) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new UnauthorizedError()
+
+  // Check if period is active
+  const { data: period } = await supabase
+    .from('inventory_periods')
+    .select('status')
+    .eq('id', periodId)
+    .eq('owner_id', user.id)
+    .single()
+
+  if (!period) throw new NotFoundError('Period not found')
+
+  if (period.status === 'active') {
+    throw new ValidationError('Cannot delete active period. Close it first.')
+  }
+
+  // Delete the period (records will be cascade deleted)
+  const { error } = await supabase
+    .from('inventory_periods')
+    .delete()
+    .eq('id', periodId)
+    .eq('owner_id', user.id)
+
+  if (error) throw error
 }
 
 export async function getActivePeriod(supabase: SupabaseClient) {

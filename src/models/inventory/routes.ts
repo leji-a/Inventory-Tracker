@@ -2,7 +2,7 @@
 import { Elysia, t } from 'elysia'
 import { SupabasePlugin } from '../../plugins/supabase'
 import * as service from './service'
-import { PeriodInputSchema, PeriodOutputSchema, ErrorSchema, RecordInputSchema, RecordOutputSchema, RecordWithProductSchema } from './schema'
+import { PeriodInputSchema, PeriodOutputSchema, ErrorSchema, RecordInputSchema, RecordOutputSchema, RecordWithProductSchema, PeriodUpdateSchema } from './schema'
 
 export const InventoryRoutes = new Elysia({ prefix: '/inventory' })
   .use(SupabasePlugin)
@@ -33,6 +33,35 @@ export const InventoryRoutes = new Elysia({ prefix: '/inventory' })
     }
   })
 
+  // Update period
+  .put('/periods/:periodId', async ({ supabase, params: { periodId }, body }) => {
+    return await service.updatePeriod(supabase, Number(periodId), body)
+  }, {
+    body: PeriodUpdateSchema,
+    response: {
+      200: PeriodOutputSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      401: ErrorSchema,
+      500: ErrorSchema
+    }
+  })
+
+  // Delete period
+  .delete('/periods/:periodId', async ({ supabase, params: { periodId }, set }) => {
+    await service.deletePeriod(supabase, Number(periodId))
+    set.status = 204
+    return null
+  }, {
+    response: {
+      204: t.Null(),
+      400: ErrorSchema,
+      404: ErrorSchema,
+      401: ErrorSchema,
+      500: ErrorSchema
+    }
+  })
+
   // Get active period
   .get('/periods/active', async ({ supabase }) => {
     return await service.getActivePeriod(supabase)
@@ -45,7 +74,7 @@ export const InventoryRoutes = new Elysia({ prefix: '/inventory' })
     }
   })
 
-  // Close a period - CHANGED :id to :periodId
+  // Close a period
   .post('/periods/:periodId/close', async ({ supabase, params: { periodId } }) => {
     return await service.closePeriod(supabase, Number(periodId))
   }, {
